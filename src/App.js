@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Card from "./components/HousingCard";
 import userData from "./data/stays.json"
 function App() {
@@ -8,6 +8,7 @@ function App() {
   const [searchMode,setSearchMode]=useState('location')
   const [childCount,setChildCount]=useState(0);
   const [adultCount,setAdultCount]=useState(0);
+  const [noOfGuest,setNoOfGuest]=useState(0)
   const [updLoc,setUpdLoc]=useState("Helsinki")
   let cityList=[];
   userData.forEach(x=>cityList.push({country:x.country,city:x.city,id:cityList.length}))
@@ -19,24 +20,34 @@ function App() {
       return acc;
     }
   }, []);
-  const displayArr=userData.filter(x=>x.city===location)
+  const totalGuest = childCount+adultCount
+  const displayArr=userData.filter(x=>x.city===location&& noOfGuest<= x.maxGuests)
   console.log(displayArr)
   const searchFilter =()=>{
     setLocation(updLoc)
     setSearch(false)
+    setNoOfGuest(childCount+adultCount)
   }
+  const hello=(e)=>{
+    if(e.key==='Escape'){
+      setSearch(false)
+    }
+  }
+  useEffect(()=>{
+    document.body.addEventListener('keydown',hello)
+  },[])
   return (
     <div className="App py-[32px] px-[96px] font-Montserrat relative">
         {
           search===false?
-          <div className="flex flex-row justify-between "  >
+          <div className="flex flex-row justify-between" >
             <div className="flex flex-row justify-center items-center">
               <img src={require("./images/logo.png")}/>
             </div>
             <div className="flex flex-row justify-center items-center shadow-md rounded-xl py-5 px-4 gap-1 "onClick={()=>setSearch(true)}>
               <p className="text-[14px] font-normal">{location},{country}</p>
               <span className="inline-block my-0 mx-[5px] border-solid border-grey-400 border-l-2 h-6"></span>
-              <p className="text-[14px] font-normal">Add Guests</p>
+              <p className="text-[14px] font-normal">{noOfGuest===0?'Add more':`${noOfGuest} guests`}</p>
               <span className="inline-block my-0 mx-[5px] border-solid border-grey-400 border-l-2 h-6"></span>
               <p className="text-airbnbRed">🔎︎</p>
             </div>
@@ -51,7 +62,7 @@ function App() {
             <span className="inline-block my-0 mx-[5px] border-solid border-grey-400 border-l-2 h-10"></span>
             <div className="flex-1 p-2" onClick={()=>setSearchMode("guests")}>
               <p className="text-[9px] font-extrabold">guest</p>
-              <p className="text-[14px]">Add more</p>
+              <p className="text-[14px]">{noOfGuest===0?'Add more':`${noOfGuest} guests`}</p>
             </div>
             <span className="inline-block my-0 mx-[5px] border-solid border-grey-400 border-l-2 h-10"></span>
             <div className="flex justify-center items-center p-[4px] flex-1">
